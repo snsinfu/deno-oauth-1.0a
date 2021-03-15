@@ -2,14 +2,14 @@ import { OAuth } from "../../mod.ts";
 import { base64, HmacSha1 } from "../deps.ts";
 import { assertEquals } from "../deps.ts";
 
-function hash_function_SHA1(base_string: string, key: string) {
+function hash_function_SHA1(base_string: string, key: string): string {
   const hmac = new HmacSha1(key);
   hmac.update(base_string);
   return base64.encode(hmac.arrayBuffer());
 }
 
 Deno.test("parameter_seperator option - default (', ') - should be equal to Twitter example", () => {
-  var oauth = new OAuth({
+  const oauth = new OAuth({
     consumer: {
       key: "xvz1evFS4wEEPTGEFPHBog",
       secret: "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw",
@@ -19,21 +19,21 @@ Deno.test("parameter_seperator option - default (', ') - should be equal to Twit
   });
 
   //overide for testing only !!!
-  oauth.getTimeStamp = function () {
+  oauth.getTimeStamp = () => {
     return 1318622958;
   };
 
   //overide for testing only !!!
-  oauth.getNonce = function () {
+  oauth.getNonce = () => {
     return "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg";
   };
 
-  var token = {
+  const token = {
     key: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
     secret: "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE",
   };
 
-  var request = {
+  const request = {
     url: "https://api.twitter.com/1/statuses/update.json?include_entities=true",
     method: "POST",
     data: {
@@ -48,7 +48,7 @@ Deno.test("parameter_seperator option - default (', ') - should be equal to Twit
 });
 
 Deno.test("parameter_seperator option - - header should be correct", () => {
-  var oauth = new OAuth({
+  const oauth = new OAuth({
     consumer: {
       key: "xvz1evFS4wEEPTGEFPHBog",
       secret: "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw",
@@ -59,21 +59,21 @@ Deno.test("parameter_seperator option - - header should be correct", () => {
   });
 
   //overide for testing only !!!
-  oauth.getTimeStamp = function () {
+  oauth.getTimeStamp = () => {
     return 1318622958;
   };
 
   //overide for testing only !!!
-  oauth.getNonce = function () {
+  oauth.getNonce = () => {
     return "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg";
   };
 
-  var token = {
+  const token = {
     key: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
     secret: "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE",
   };
 
-  var request = {
+  const request = {
     url: "https://api.twitter.com/1/statuses/update.json?include_entities=true",
     method: "POST",
     data: {

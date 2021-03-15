@@ -2,14 +2,14 @@ import { OAuth } from "../../mod.ts";
 import { base64, HmacSha1 } from "../deps.ts";
 import { assertEquals } from "../deps.ts";
 
-function hash_function_SHA1(base_string: string, key: string) {
+function hash_function_SHA1(base_string: string, key: string): string {
   const hmac = new HmacSha1(key);
   hmac.update(base_string);
   return base64.encode(hmac.arrayBuffer());
 }
 
 (() => {
-  var oauth = new OAuth({
+  const oauth = new OAuth({
     consumer: {
       key: "",
       secret: "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw",
@@ -18,7 +18,7 @@ function hash_function_SHA1(base_string: string, key: string) {
     hash_function: hash_function_SHA1,
   });
 
-  var token = {
+  const token = {
     secret: "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE",
   };
 
@@ -38,7 +38,7 @@ function hash_function_SHA1(base_string: string, key: string) {
 })();
 
 (() => {
-  var oauth = new OAuth({
+  const oauth = new OAuth({
     consumer: {
       key: "",
       secret: "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw",
@@ -48,7 +48,7 @@ function hash_function_SHA1(base_string: string, key: string) {
     last_ampersand: false,
   });
 
-  var token = {
+  const token = {
     secret: "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE",
   };
 

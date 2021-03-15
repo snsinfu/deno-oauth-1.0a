@@ -4,7 +4,7 @@ import { assertEquals } from "../deps.ts";
 //TODO: check alphabet and numberic only
 
 Deno.test("nonce_length option - default (32) - nonce length should be 32", () => {
-  var oauth = new OAuth({
+  const oauth = new OAuth({
     consumer: { key: "", secret: "" },
   });
 
@@ -12,7 +12,7 @@ Deno.test("nonce_length option - default (32) - nonce length should be 32", () =
 });
 
 Deno.test("nonce_length option - length 100 - nonce length should be 100", () => {
-  var oauth = new OAuth({
+  const oauth = new OAuth({
     consumer: { key: "", secret: "" },
     nonce_length: 100,
   });
@@ -21,13 +21,8 @@ Deno.test("nonce_length option - length 100 - nonce length should be 100", () =>
 });
 
 Deno.test("nonce_length option - random length - nonce length should be correct", () => {
-  var random = (Math.random() * 100) >> 0;
-
-  while (random === 0) {
-    random = (Math.random() * 100) >> 0;
-  }
-
-  var oauth = new OAuth({
+  const random = (1 + Math.random() * 99) >> 0;
+  const oauth = new OAuth({
     consumer: { key: "", secret: "" },
     nonce_length: random,
   });

@@ -14,17 +14,13 @@ export class OAuth {
    * @param {Object} opts consumer key and secret
    */
   constructor(opts: OAuth.Options) {
-    if (!opts.consumer) {
-      throw new Error("consumer option is required");
-    }
-
     this.consumer = opts.consumer;
     this.nonce_length = opts.nonce_length || 32;
     this.version = opts.version || "1.0";
     this.parameter_seperator = opts.parameter_seperator || ", ";
     this.realm = opts.realm;
 
-    if (typeof opts.last_ampersand === "undefined") {
+    if (opts.last_ampersand === undefined) {
       this.last_ampersand = true;
     } else {
       this.last_ampersand = opts.last_ampersand;
@@ -34,7 +30,7 @@ export class OAuth {
     this.signature_method = opts.signature_method || "PLAINTEXT";
 
     if (this.signature_method == "PLAINTEXT" && !opts.hash_function) {
-      opts.hash_function = function (base_string, key) {
+      opts.hash_function = (base_string: string, key: string) => {
         return key;
       };
     }
@@ -62,7 +58,7 @@ export class OAuth {
     request: OAuth.RequestOptions,
     token?: OAuth.Token,
   ): OAuth.Authorization {
-    var oauth_data: any = {
+    const oauth_data: any = {
       oauth_consumer_key: this.consumer.key,
       oauth_nonce: this.getNonce(),
       oauth_signature_method: this.signature_method,
@@ -117,7 +113,7 @@ export class OAuth {
     request: OAuth.RequestOptions,
     token_secret: string | undefined,
   ): string {
-    var body = typeof request.data === "string"
+    const body = typeof request.data === "string"
       ? request.data
       : JSON.stringify(request.data);
 
@@ -154,7 +150,7 @@ export class OAuth {
     request: OAuth.RequestOptions,
     oauth_data: OAuth.Data,
   ): string {
-    var base_string_data;
+    let base_string_data: {key: string | number | symbol, value: any}[];
     if (oauth_data.oauth_body_hash) {
       base_string_data = this.sortObject(
         this.percentEncodeData(
@@ -172,26 +168,26 @@ export class OAuth {
       );
     }
 
-    var data_str = "";
+    let data_str = "";
 
     //base_string_data to string
-    for (var i = 0; i < base_string_data.length; i++) {
-      var key = base_string_data[i].key.toString();
-      var value = base_string_data[i].value;
+    for (let i = 0; i < base_string_data.length; i++) {
+      const key = base_string_data[i].key.toString();
+      const value = base_string_data[i].value;
       // check if the value is an array
       // this means that this key has multiple values
       if (value && Array.isArray(value)) {
         // sort the array first
         value.sort();
 
-        var valString = "";
+        let valString = "";
         // serialize all values for this key: e.g. formkey=formvalue1&formkey=formvalue2
-        value.forEach((function (item: string, i: number) {
+        value.forEach((item: string, i: number) => {
           valString += key + "=" + item;
           if (i < value.length) {
             valString += "&";
           }
-        }).bind(this));
+        });
         data_str += valString;
       } else {
         data_str += key + "=" + value + "&";
@@ -208,7 +204,7 @@ export class OAuth {
    * @param  {String} token_secret Secret Token
    * @return {String} Signing Key
    */
-  getSigningKey(token_secret: string | undefined): string {
+  getSigningKey(token_secret?: string): string {
     token_secret = token_secret || "";
 
     if (!this.last_ampersand && !token_secret) {
@@ -234,11 +230,11 @@ export class OAuth {
    * @return {Object}
    */
   deParam(str: string): OAuth.Param {
-    var arr = str.split("&");
-    var data: any = {};
+    const arr = str.split("&");
+    const data: any = {};
 
-    for (var i = 0; i < arr.length; i++) {
-      var item = arr[i].split("=");
+    for (let i = 0; i < arr.length; i++) {
+      const item = arr[i].split("=");
 
       // '' value
       item[1] = item[1] || "";
@@ -268,7 +264,7 @@ export class OAuth {
    * @return {Object}
    */
   deParamUrl(url: string): OAuth.Param {
-    var tmp = url.split("?");
+    const tmp = url.split("?");
 
     if (tmp.length === 1) {
       return {};
@@ -297,13 +293,13 @@ export class OAuth {
    * @return {Object} percent encoded data
    */
   percentEncodeData(data: any): any {
-    var result: any = {};
+    const result: any = {};
 
-    for (var key in data) {
-      var value = data[key];
+    for (const key in data) {
+      let value = data[key];
       // check if the value is an array
       if (value && Array.isArray(value)) {
-        var newValue: string[] = [];
+        const newValue: string[] = [];
         // percentEncode every value
         value.forEach((val: any) => {
           newValue.push(this.percentEncode(val as string));
@@ -324,15 +320,15 @@ export class OAuth {
    * @return {String} Header data key - value
    */
   toHeader(oauth_data: OAuth.Authorization): OAuth.Header {
-    var sorted = this.sortObject(oauth_data);
+    const sorted = this.sortObject(oauth_data);
 
-    var header_value = "OAuth ";
+    let header_value = "OAuth ";
 
     if (this.realm) {
       header_value += 'realm="' + this.realm + '"' + this.parameter_seperator;
     }
 
-    for (var i = 0; i < sorted.length; i++) {
+    for (let i = 0; i < sorted.length; i++) {
       if ((sorted[i].key as string).indexOf("oauth_") !== 0) {
         continue;
       }
@@ -355,11 +351,11 @@ export class OAuth {
    * @return {String} a random word characters string
    */
   getNonce(): string {
-    var word_characters =
+    const word_characters =
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    var result = "";
+    let result = "";
 
-    for (var i = 0; i < this.nonce_length; i++) {
+    for (let i = 0; i < this.nonce_length; i++) {
       result += word_characters[(Math.random() * word_characters.length) >> 0];
     }
 
@@ -394,13 +390,12 @@ export class OAuth {
   sortObject<O extends { [k: string]: any }, K extends string>(
     obj: O,
   ): Array<{ key: keyof O; value: O[K] }> {
-    var keys = Object.keys(obj);
-    var result = [];
+    const keys = Object.keys(obj);
+    const result = [];
 
     keys.sort();
 
-    for (var i = 0; i < keys.length; i++) {
-      var key = keys[i];
+    for (const key of keys) {
       result.push({
         key: key,
         value: obj[key],

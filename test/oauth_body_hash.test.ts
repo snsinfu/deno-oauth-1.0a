@@ -1,8 +1,9 @@
 import { OAuth } from "../mod.ts";
-import { assertEquals, assertExists, HmacSha1, Sha1, base64 } from "./deps.ts";
+import { HmacSha1, Sha1, base64 } from "./deps.ts";
+import { assertEquals } from "./deps.ts";
 
-var oauth: OAuth;
-var request: any;
+let oauth: OAuth;
+let request: any;
 
 function beforeEach() {
   oauth = new OAuth({
@@ -11,12 +12,12 @@ function beforeEach() {
       secret: "932a216f-fb94-43b6-a2d2-e9c6b345cbea",
     },
     signature_method: "HMAC-SHA1",
-    hash_function: function (base_string, key) {
+    hash_function: (base_string: string, key: string): string => {
       const hmac = new HmacSha1(key);
       hmac.update(base_string);
       return base64.encode(hmac.arrayBuffer());
     },
-    body_hash_function: function (data) {
+    body_hash_function: (data: string): string => {
       const hash = new Sha1();
       hash.update(data);
       return base64.encode(hash.arrayBuffer());
@@ -24,12 +25,12 @@ function beforeEach() {
   });
 
   //overide for testing only !!!
-  oauth.getTimeStamp = function () {
+  oauth.getTimeStamp = () => {
     return 1484599369;
   };
 
   //overide for testing only !!!
-  oauth.getNonce = function () {
+  oauth.getNonce = () => {
     return "t62lMDp9DLwKZJJbZTpmSAhRINGBEOcF";
   };
 
@@ -136,10 +137,8 @@ Deno.test("OAuth Body Hash - #authorize - should properly include an oauth_body_
 
 Deno.test("OAuth Body Hash - #toHeader - should properly include an oauth_body_hash header", () => {
   beforeEach();
-  const actual = oauth.toHeader(oauth.authorize(request));
-  assertExists(actual.Authorization);
   assertEquals(
-    actual.Authorization,
+    oauth.toHeader(oauth.authorize(request)).Authorization,
     'OAuth oauth_body_hash="xpJzRG6xylVIRRtiigLPKX7iRmM%3D", oauth_consumer_key="1434affd-4d69-4a1a-bace-cc5c6fe493bc", oauth_nonce="t62lMDp9DLwKZJJbZTpmSAhRINGBEOcF", oauth_signature="1Q0U8yhK1bWYguRxlUDs9KHywOE%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1484599369", oauth_version="1.0"',
   );
 });

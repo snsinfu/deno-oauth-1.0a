@@ -1,13 +1,13 @@
 import { OAuth } from "../mod.ts";
-import { assertEquals, assertExists, base64, HmacSha1 } from "./deps.ts";
+import { assertEquals, base64, HmacSha1 } from "./deps.ts";
 
-var oauth = new OAuth({
+const oauth = new OAuth({
   consumer: {
     key: "xvz1evFS4wEEPTGEFPHBog",
     secret: "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw",
   },
   signature_method: "HMAC-SHA1",
-  hash_function: function (base_string, key) {
+  hash_function: (base_string: string, key: string): string => {
     const hmac = new HmacSha1(key);
     hmac.update(base_string);
     return base64.encode(hmac.arrayBuffer());
@@ -15,21 +15,21 @@ var oauth = new OAuth({
 });
 
 //overide for testing only !!!
-oauth.getTimeStamp = function () {
+oauth.getTimeStamp = () => {
   return 1318622958;
 };
 
 //overide for testing only !!!
-oauth.getNonce = function () {
+oauth.getNonce = () => {
   return "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg";
 };
 
-var token = {
+const token = {
   key: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
   secret: "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE",
 };
 
-var request = {
+const request = {
   url: "https://api.twitter.com/1/statuses/update.json?include_entities=true",
   method: "POST",
   data: {
@@ -37,7 +37,7 @@ var request = {
   },
 };
 
-var oauth_data = {
+const oauth_data = {
   oauth_consumer_key: oauth.consumer.key,
   oauth_nonce: oauth.getNonce(),
   oauth_signature_method: oauth.signature_method,
@@ -87,10 +87,8 @@ Deno.test("Twitter Sample - #authorize - should be equal to Twitter example", ()
 });
 
 Deno.test("Twitter Sample - #toHeader - should be equal to Twitter example", () => {
-  const actual = oauth.toHeader(oauth.authorize(request, token));
-  assertExists(actual.Authorization);
   assertEquals(
-    actual.Authorization,
+    oauth.toHeader(oauth.authorize(request, token)).Authorization,
     'OAuth oauth_consumer_key="xvz1evFS4wEEPTGEFPHBog", oauth_nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg", oauth_signature="tnnArxj06cWHq44gCs1OSKk%2FjLY%3D", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1318622958", oauth_token="370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb", oauth_version="1.0"',
   );
 });
