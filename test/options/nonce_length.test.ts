@@ -1,4 +1,4 @@
-import OAuth from "../../mod.ts";
+import { OAuth } from "../../mod.ts";
 import { assertEquals } from "../deps.ts";
 
 //TODO: check alphabet and numberic only

@@ -1,4 +1,4 @@
-import OAuth from "../mod.ts";
+import { OAuth } from "../mod.ts";
 import { assertEquals, assertExists, base64, HmacSha1 } from "./deps.ts";
 
 var oauth = new OAuth({

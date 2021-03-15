@@ -1,4 +1,4 @@
-import OAuth from "../../mod.ts";
+import { OAuth } from "../../mod.ts";
 import { assertEquals, assertThrows } from "../deps.ts";
 
 Deno.test("Signature method - default PLAINTEXT signature method", () => {
