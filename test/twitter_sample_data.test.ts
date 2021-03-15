@@ -82,8 +82,6 @@ Deno.test("Twitter Sample - #authorize - should be equal to Twitter example", ()
     oauth_timestamp: 1318622958,
     oauth_version: "1.0",
     oauth_token: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
-    status: "Hello Ladies + Gentlemen, a signed OAuth request!",
-    include_entities: "true",
     oauth_signature: "tnnArxj06cWHq44gCs1OSKk/jLY=",
   });
 });
