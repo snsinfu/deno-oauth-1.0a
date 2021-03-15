@@ -500,3 +500,5 @@ export namespace OAuth {
     secret: string;
   }
 }
+
+export default OAuth;
