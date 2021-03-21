@@ -2,13 +2,14 @@
 
 [![Test Status][test-badge]][test-url]
 
-OAuth 1.0a Request Authorization module for Deno.
+OAuth 1.0a Request Authorization module for Deno. [Documentation][doc].
 
 - [Test](#test)
 - [License](#license)
 
 [test-badge]: https://github.com/snsinfu/deno-oauth-1.0a/workflows/test/badge.svg
 [test-url]: https://github.com/snsinfu/deno-oauth-1.0a/actions?query=workflow%3Atest
+[doc]: https://doc.deno.land/https/raw.githubusercontent.com/snsinfu/deno-oauth-1.0a/main/mod.ts
 
 ## Test
 
