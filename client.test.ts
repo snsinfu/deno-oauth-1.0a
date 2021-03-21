@@ -62,7 +62,6 @@ Deno.test("OAuthClient.signToHeader - prepends realm", () => {
   data.append("currentbrowserversion", "1");
   data.append("currentbrowserversion", "5");
   data.append("currentbrowserversion", "dfadfadfa");
-  data.append("alt", "json");
 
   const result = client.signToHeader(
     "PUT",
