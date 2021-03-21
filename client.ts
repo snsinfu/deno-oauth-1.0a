@@ -314,13 +314,12 @@ export function createBaseString(
   baseUrl: string,
   params: KV[],
 ): string {
-  let baseStr = percentEncode(method.toUpperCase());
-  baseStr += "&";
-  baseStr += percentEncode(baseUrl);
-  for (const { key, value } of normalizeParams(params)) {
-    baseStr += "&" + key + "=" + value;
-  }
-  return baseStr;
+  const paramStr = normalizeParams(params)
+    .map(({ key, value }: KV) => key + "=" + value)
+    .join("&");
+  return percentEncode(method.toUpperCase()) + "&" +
+    percentEncode(baseUrl) + "&" +
+    percentEncode(paramStr);
 }
 
 /** Normalize request parameters per 3.4.1.3.2. */
