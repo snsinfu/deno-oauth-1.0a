@@ -1,6 +1,6 @@
 import { createBaseParams, createBaseString, OAuthClient } from "./client.ts";
-import { HMAC_SHA1 } from "./sign.ts";
-import { assertEquals } from "./test_deps.ts";
+import { PLAINTEXT, HMAC_SHA1 } from "./sign.ts";
+import { assert, assertEquals, assertNotEquals } from "./test_deps.ts";
 
 // SIGNATURE BASE STRING -----------------------------------------------------
 
@@ -64,6 +64,34 @@ Deno.test("createBaseString - reproduces Twitter example", () => {
 });
 
 // MAIN CLASS ----------------------------------------------------------------
+
+Deno.test("OAuthClient.sign - generates unique nonce on each invocation", () => {
+  const client = new OAuthClient({
+    consumer: { key: "consumer-key", secret: "consumer-secret" },
+    signature: PLAINTEXT,
+  });
+  const sign1 = client.sign("GET", "https://example.com/");
+  const sign2 = client.sign("GET", "https://example.com/");
+
+  assertNotEquals(sign1.oauth_nonce?.length, 0);
+  assertNotEquals(sign2.oauth_nonce?.length, 0);
+  assertNotEquals(sign1.oauth_nonce, sign2.oauth_nonce);
+});
+
+Deno.test("OAuthClient.sign - uses current unix timestamp", () => {
+  const client = new OAuthClient({
+    consumer: { key: "consumer-key", secret: "consumer-secret" },
+    signature: PLAINTEXT,
+  });
+
+  const lower = (Date.now() / 1000) | 0;
+  const sign = client.sign("GET", "https://example.com/");
+  const upper = (Date.now() / 1000) | 0;
+
+  assert(sign.oauth_timestamp);
+  assert(sign.oauth_timestamp >= lower);
+  assert(sign.oauth_timestamp <= upper);
+});
 
 // Taken from ddo/oauth-1.0a.
 Deno.test("OAuthClient.signToHeader - prepends realm", () => {
