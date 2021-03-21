@@ -1,13 +1,17 @@
 export { HMAC_SHA1, PLAINTEXT } from "./sign.ts";
+
 export {
-  ClientOptions,
   OAuthClient,
+  toAuthHeader,
+  toQueryParams,
+} from "./client.ts";
+
+export type {
+  ClientOptions,
   OAuthOptions,
   OAuthParams,
   SignatureMethod,
   SignedOAuthParams,
   SignOptions,
-  toAuthHeader,
   Token,
-  toQueryParams,
 } from "./client.ts";
