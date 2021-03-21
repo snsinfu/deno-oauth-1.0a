@@ -93,6 +93,38 @@ Deno.test("OAuthClient.sign - uses current unix timestamp", () => {
   assert(sign.oauth_timestamp <= upper);
 });
 
+Deno.test("OAuthClient.sign - produces correct PLAINTEXT signature", () => {
+  const client = new OAuthClient({
+    consumer: { key: "consumer-key", secret: "consumer-secret" },
+    signature: PLAINTEXT,
+  });
+  const sign = client.sign("GET", "https://example.com/", {
+    token: { key: "request-key", secret: "request-secret" },
+  });
+
+  assertEquals(sign.oauth_signature, "consumer-secret&request-secret");
+});
+
+Deno.test("OAuthClient.sign - produces correct HMAC-SHA1 signature (RFC)", () => {
+  // https://tools.ietf.org/html/rfc5849#section-3.1
+  const client = new OAuthClient({
+    consumer: { key: "9djdj82h48djs9d2", secret: "j49sk3j29djd" },
+    signature: HMAC_SHA1,
+    realm: "Example",
+  });
+  const sign = client.sign(
+    "POST",
+    "http://example.com/request?b5=%3D%253D&a3=a&c%40=&a2=r%20b",
+    {
+      token: { key: "kkk9d7dh3k39sjv7", secret: "dh893hdasih9" },
+      params: { oauth_timestamp: 137131201, oauth_nonce: "7d8f3e4a" },
+      body: new URLSearchParams("c2&a3=2+q"),
+    },
+  );
+
+  assertEquals(sign.oauth_signature, "bYT5CMsGcbgUdFHObYMEfcx6bsw=");
+});
+
 // Taken from ddo/oauth-1.0a.
 Deno.test("OAuthClient.signToHeader - prepends realm", () => {
   const client = new OAuthClient({
@@ -117,6 +149,7 @@ Deno.test("OAuthClient.signToHeader - prepends realm", () => {
       params: {
         oauth_timestamp: 1445951836,
         oauth_nonce: "tKOQtKan8PHIrIoOlrl17zHkZQ2H5CsP",
+        oauth_version: "1.0",
       },
       body: body,
     },
