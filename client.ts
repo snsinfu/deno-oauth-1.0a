@@ -51,7 +51,6 @@ export class OAuthClient {
   sign(method: string, url: string, opts?: SignOptions): SignedOAuthParams {
     const params: OAuthParams = {
       oauth_consumer_key: this.consumer.key,
-      oauth_version: "1.0",
       oauth_signature_method: this.signature.name,
       ...opts?.params,
     };
@@ -134,6 +133,7 @@ export interface OAuthOptions {
   oauth_callback?: string;
   oauth_timestamp?: number;
   oauth_nonce?: string;
+  oauth_version?: "1.0";
 }
 
 /** Collection of OAuth protocol parameters except signature. */
