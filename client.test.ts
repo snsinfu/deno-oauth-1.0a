@@ -107,6 +107,7 @@ Deno.test("OAuthClient.sign - produces correct PLAINTEXT signature", () => {
 
 Deno.test("OAuthClient.sign - produces correct HMAC-SHA1 signature (RFC)", () => {
   // https://tools.ietf.org/html/rfc5849#section-3.1
+  // https://www.rfc-editor.org/errata/eid2550
   const client = new OAuthClient({
     consumer: { key: "9djdj82h48djs9d2", secret: "j49sk3j29djd" },
     signature: HMAC_SHA1,
@@ -122,7 +123,7 @@ Deno.test("OAuthClient.sign - produces correct HMAC-SHA1 signature (RFC)", () =>
     },
   );
 
-  assertEquals(sign.oauth_signature, "bYT5CMsGcbgUdFHObYMEfcx6bsw=");
+  assertEquals(sign.oauth_signature, "r6/TJjbCOr97/+UU0NsvSne7s5g=");
 });
 
 // Taken from ddo/oauth-1.0a.
