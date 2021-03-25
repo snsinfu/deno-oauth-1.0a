@@ -3,6 +3,7 @@ import {
   createBaseString,
   OAuthClient,
   toAuthHeader,
+  toQueryParams,
 } from "./client.ts";
 import { HMAC_SHA1, PLAINTEXT } from "./sign.ts";
 import { assert, assertEquals, assertNotEquals } from "./test_deps.ts";
@@ -292,6 +293,26 @@ Deno.test("toAuthHeader - escapes special characters in realm", () => {
     'oauth_consumer_key="key", ' +
     'oauth_signature="secret%26", ' +
     'oauth_signature_method="PLAINTEXT"';
+
+  assertEquals(actual, expected);
+});
+
+Deno.test("toQueryParams - produces correct query params (RFC)", () => {
+  const actual = toQueryParams({
+    oauth_consumer_key: "0685bd9184jfhq22",
+    oauth_token: "ad180jjd733klru7",
+    oauth_signature_method: "HMAC-SHA1",
+    oauth_signature: "wOJIO9A2W5mFwDgiDvZbTSMK/PY=",
+    oauth_timestamp: 137131200,
+    oauth_nonce: "4572616e48616d6d65724c61686176",
+    oauth_version: "1.0",
+  });
+
+  const expected = new URLSearchParams(
+    "oauth_consumer_key=0685bd9184jfhq22&oauth_token=ad180jjd733klr" +
+    "u7&oauth_signature_method=HMAC-SHA1&oauth_signature=wOJIO9A2W5" +
+    "mFwDgiDvZbTSMK%2FPY%3D&oauth_timestamp=137131200&oauth_nonce=4",
+  );
 
   assertEquals(actual, expected);
 });
