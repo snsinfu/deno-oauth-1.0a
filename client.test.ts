@@ -10,16 +10,19 @@ import { assert, assertEquals, assertNotEquals } from "./test_deps.ts";
 // SIGNATURE BASE STRING -----------------------------------------------------
 
 Deno.test("createBaseString - reproduces RFC example", () => {
-  const oauthParams = {
-    oauth_consumer_key: "9djdj82h48djs9d2",
-    oauth_token: "kkk9d7dh3k39sjv7",
-    oauth_signature_method: "HMAC-SHA1",
-    oauth_timestamp: 137131201,
-    oauth_nonce: "7d8f3e4a",
-  };
   const query = new URLSearchParams("b5=%3D%253D&a3=a&c%40=&a2=r%20b");
   const body = new URLSearchParams("c2&a3=2+q");
-  const params = createBaseParams(oauthParams, query, body);
+  const params = createBaseParams(
+    {
+      oauth_consumer_key: "9djdj82h48djs9d2",
+      oauth_token: "kkk9d7dh3k39sjv7",
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: 137131201,
+      oauth_nonce: "7d8f3e4a",
+    },
+    query,
+    body,
+  );
 
   const actual = createBaseString(
     "POST",
@@ -38,18 +41,24 @@ Deno.test("createBaseString - reproduces RFC example", () => {
 
 // Taken from ddo/oauth-1.0a.
 Deno.test("createBaseString - reproduces Twitter example", () => {
-  const oauthParams = {
-    oauth_consumer_key: "xvz1evFS4wEEPTGEFPHBog",
-    oauth_nonce: "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg",
-    oauth_signature_method: "HMAC-SHA1",
-    oauth_timestamp: 1318622958,
-    oauth_version: "1.0" as "1.0",
-    oauth_token: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
-  };
-  const query = new URLSearchParams("include_entities=true");
-  const body = new URLSearchParams();
-  body.append("status", "Hello Ladies + Gentlemen, a signed OAuth request!");
-  const params = createBaseParams(oauthParams, query, body);
+  const query = new URLSearchParams({
+    include_entities: "true",
+  });
+  const body = new URLSearchParams({
+    status: "Hello Ladies + Gentlemen, a signed OAuth request!",
+  });
+  const params = createBaseParams(
+    {
+      oauth_consumer_key: "xvz1evFS4wEEPTGEFPHBog",
+      oauth_nonce: "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg",
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: 1318622958,
+      oauth_version: "1.0",
+      oauth_token: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
+    },
+    query,
+    body,
+  );
 
   const actual = createBaseString(
     "POST",
@@ -160,12 +169,14 @@ Deno.test("OAuthClient.signToHeader - prepends realm", () => {
       body: body,
     },
   );
-  const expected =
-    'OAuth realm="https://ddo.me/", oauth_consumer_key="batch-dbc2cd8c-6' +
-    'ca8-463b-96e2-6d8683eac6fd", oauth_nonce="tKOQtKan8PHIrIoOlrl17zHkZ' +
-    'Q2H5CsP", oauth_signature="ri0lfv4udd2uQmkg5cCPVqLruyk%3D", oauth_s' +
-    'ignature_method="HMAC-SHA1", oauth_timestamp="1445951836", oauth_ve' +
-    'rsion="1.0"';
+
+  const expected = 'OAuth realm="https://ddo.me/", ' +
+    'oauth_consumer_key="batch-dbc2cd8c-6ca8-463b-96e2-6d8683eac6fd", ' +
+    'oauth_nonce="tKOQtKan8PHIrIoOlrl17zHkZQ2H5CsP", ' +
+    'oauth_signature="ri0lfv4udd2uQmkg5cCPVqLruyk%3D", ' +
+    'oauth_signature_method="HMAC-SHA1", ' +
+    'oauth_timestamp="1445951836", ' +
+    'oauth_version="1.0"';
 
   assertEquals(actual, expected);
 });
@@ -213,6 +224,8 @@ Deno.test("OAuthClient.sign - produces correct parameters (Twitter)", () => {
   );
 });
 
+// POSTPROCESSING ------------------------------------------------------------
+
 // Taken from ddo/oauth-1.0a.
 Deno.test("toAuthHeader - produces correct header (Twitter)", () => {
   const actual = toAuthHeader(
@@ -226,8 +239,8 @@ Deno.test("toAuthHeader - produces correct header (Twitter)", () => {
       oauth_signature: "tnnArxj06cWHq44gCs1OSKk/jLY=",
     },
   );
-  const expected =
-    'OAuth oauth_consumer_key="xvz1evFS4wEEPTGEFPHBog", ' +
+
+  const expected = 'OAuth oauth_consumer_key="xvz1evFS4wEEPTGEFPHBog", ' +
     'oauth_nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg", ' +
     'oauth_signature="tnnArxj06cWHq44gCs1OSKk%2FjLY%3D", ' +
     'oauth_signature_method="HMAC-SHA1", ' +
