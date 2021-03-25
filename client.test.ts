@@ -1,5 +1,10 @@
-import { createBaseParams, createBaseString, OAuthClient, toAuthHeader } from "./client.ts";
-import { PLAINTEXT, HMAC_SHA1 } from "./sign.ts";
+import {
+  createBaseParams,
+  createBaseString,
+  OAuthClient,
+  toAuthHeader,
+} from "./client.ts";
+import { HMAC_SHA1, PLAINTEXT } from "./sign.ts";
 import { assert, assertEquals, assertNotEquals } from "./test_deps.ts";
 
 // SIGNATURE BASE STRING -----------------------------------------------------
@@ -229,6 +234,51 @@ Deno.test("toAuthHeader - produces correct header (Twitter)", () => {
     'oauth_timestamp="1318622958", ' +
     'oauth_token="370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb", ' +
     'oauth_version="1.0"';
+
+  assertEquals(actual, expected);
+});
+
+Deno.test("toAuthHeader - produces correct header with realm (RFC)", () => {
+  const actual = toAuthHeader(
+    {
+      oauth_consumer_key: "9djdj82h48djs9d2",
+      oauth_token: "kkk9d7dh3k39sjv7",
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: 137131201,
+      oauth_nonce: "7d8f3e4a",
+      oauth_signature: "r6/TJjbCOr97/+UU0NsvSne7s5g=",
+    },
+    "Example",
+  );
+
+  // The order of parameters is different from the RFC example because
+  // toAuthHeader sorts parameters for consistent output.
+  const expected = 'OAuth realm="Example", ' +
+    'oauth_consumer_key="9djdj82h48djs9d2", ' +
+    'oauth_nonce="7d8f3e4a", ' +
+    'oauth_signature="r6%2FTJjbCOr97%2F%2BUU0NsvSne7s5g%3D", ' +
+    'oauth_signature_method="HMAC-SHA1", ' +
+    'oauth_timestamp="137131201", ' +
+    'oauth_token="kkk9d7dh3k39sjv7"';
+
+  assertEquals(actual, expected);
+});
+
+Deno.test("toAuthHeader - escapes special characters in realm", () => {
+  const actual = toAuthHeader(
+    {
+      oauth_consumer_key: "key",
+      oauth_signature_method: "PLAINTEXT",
+      oauth_signature: "secret&",
+    },
+    'abc:"123 \\ 456"',
+  );
+
+  // realm is escaped as a quoted-string.
+  const expected = 'OAuth realm="abc:\\"123 \\\\ 456\\"", ' +
+    'oauth_consumer_key="key", ' +
+    'oauth_signature="secret%26", ' +
+    'oauth_signature_method="PLAINTEXT"';
 
   assertEquals(actual, expected);
 });
