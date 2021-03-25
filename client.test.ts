@@ -293,22 +293,18 @@ Deno.test("OAuthClient.sign - produces correct SHA1 body hash", () => {
 });
 
 // Taken from ddo/oauth-1.0a.
-Deno.test("OAuthClient.signToHeader - prepends realm", () => {
+Deno.test("OAuthClient.sign - computes correct signature for multi-valued parameters", () => {
   const client = new OAuthClient({
     consumer: {
       key: "batch-dbc2cd8c-6ca8-463b-96e2-6d8683eac6fd",
       secret: "4S4Rvm25CJZWv7HBg5HOhhlRTBSZ7npl",
     },
-    realm: "https://ddo.me/",
     signature: HMAC_SHA1,
   });
 
   const body = new URLSearchParams();
-  body.append("currentbrowserversion", "1");
-  body.append("currentbrowserversion", "5");
-  body.append("currentbrowserversion", "dfadfadfa");
 
-  const actual = client.signToHeader(
+  const actual = client.sign(
     "PUT",
     "http://localhost:3737/rest/profiles/" +
       "1ea2a42f-e14d-4057-8bcd-3e0b4514a267/properties?alt=json",
@@ -318,17 +314,47 @@ Deno.test("OAuthClient.signToHeader - prepends realm", () => {
         oauth_nonce: "tKOQtKan8PHIrIoOlrl17zHkZQ2H5CsP",
         oauth_version: "1.0",
       },
-      body: body,
+      body: new URLSearchParams([
+        ["currentbrowserversion", "1"],
+        ["currentbrowserversion", "5"],
+        ["currentbrowserversion", "dfadfadfa"],
+      ]),
     },
   );
 
-  const expected = 'OAuth realm="https://ddo.me/", ' +
-    'oauth_consumer_key="batch-dbc2cd8c-6ca8-463b-96e2-6d8683eac6fd", ' +
-    'oauth_nonce="tKOQtKan8PHIrIoOlrl17zHkZQ2H5CsP", ' +
-    'oauth_signature="ri0lfv4udd2uQmkg5cCPVqLruyk%3D", ' +
-    'oauth_signature_method="HMAC-SHA1", ' +
-    'oauth_timestamp="1445951836", ' +
-    'oauth_version="1.0"';
+  assertEquals(
+    actual,
+    {
+      oauth_consumer_key: "batch-dbc2cd8c-6ca8-463b-96e2-6d8683eac6fd",
+      oauth_nonce: "tKOQtKan8PHIrIoOlrl17zHkZQ2H5CsP",
+      oauth_signature: "ri0lfv4udd2uQmkg5cCPVqLruyk=",
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: 1445951836,
+      oauth_version: "1.0",
+    },
+  );
+});
+
+Deno.test("OAuthClient.signToHeader - prepends realm", () => {
+  const client = new OAuthClient({
+    consumer: { key: "key", secret: "secret" },
+    realm: "Example",
+    signature: PLAINTEXT,
+  });
+
+  const actual = client.signToHeader("GET", "http://example.com", {
+    params: {
+      oauth_nonce: "123456",
+      oauth_timestamp: 1600000000,
+    },
+  });
+
+  const expected = 'OAuth realm="Example", ' +
+    'oauth_consumer_key="key", ' +
+    'oauth_nonce="123456", ' +
+    'oauth_signature="secret%26", ' +
+    'oauth_signature_method="PLAINTEXT", ' +
+    'oauth_timestamp="1600000000"';
 
   assertEquals(actual, expected);
 });
@@ -418,8 +444,8 @@ Deno.test("toQueryParams - produces correct query params (RFC)", () => {
 
   const expected = new URLSearchParams(
     "oauth_consumer_key=0685bd9184jfhq22&oauth_token=ad180jjd733klr" +
-    "u7&oauth_signature_method=HMAC-SHA1&oauth_signature=wOJIO9A2W5" +
-    "mFwDgiDvZbTSMK%2FPY%3D&oauth_timestamp=137131200&oauth_nonce=4",
+      "u7&oauth_signature_method=HMAC-SHA1&oauth_signature=wOJIO9A2W5" +
+      "mFwDgiDvZbTSMK%2FPY%3D&oauth_timestamp=137131200&oauth_nonce=4",
   );
 
   assertEquals(actual, expected);
