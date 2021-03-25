@@ -293,7 +293,7 @@ Deno.test("OAuthClient.sign - produces correct SHA1 body hash", () => {
 });
 
 // Taken from ddo/oauth-1.0a.
-Deno.test("OAuthClient.sign - computes correct signature for multi-valued parameters", () => {
+Deno.test("OAuthClient.sign - computes correct signature for multi-valued body parameters", () => {
   const client = new OAuthClient({
     consumer: {
       key: "batch-dbc2cd8c-6ca8-463b-96e2-6d8683eac6fd",
@@ -301,8 +301,6 @@ Deno.test("OAuthClient.sign - computes correct signature for multi-valued parame
     },
     signature: HMAC_SHA1,
   });
-
-  const body = new URLSearchParams();
 
   const actual = client.sign(
     "PUT",
@@ -330,6 +328,46 @@ Deno.test("OAuthClient.sign - computes correct signature for multi-valued parame
       oauth_signature: "ri0lfv4udd2uQmkg5cCPVqLruyk=",
       oauth_signature_method: "HMAC-SHA1",
       oauth_timestamp: 1445951836,
+      oauth_version: "1.0",
+    },
+  );
+});
+
+// Taken from ddo/oauth-1.0a.
+Deno.test("OAuthClient.sign - computes correct signature for multi-valued query parameters", () => {
+  const client = new OAuthClient({
+    consumer: {
+      key: "batch-8f4fd2c6-9fa3-4368-9797-52876d723dd1",
+      secret: "ZACXtYe6LQ4C5X0KbJcDkbW77GYtlaoU",
+    },
+    signature: HMAC_SHA1,
+  });
+
+  const actual = client.sign(
+    "GET",
+    "http://localhost:3737/rest/profiles?" +
+      "property=email&" +
+      "value=vel.arcu%40ultriciesornareelit.ca&" +
+      "property=visitdate&" +
+      "value=abc&" +
+      "alt=json",
+    {
+      params: {
+        oauth_timestamp: 1504882975,
+        oauth_nonce: "xsEYfvjTEiPTR3TqJbmhCpUdrDoHF6nk",
+        oauth_version: "1.0",
+      },
+    },
+  );
+
+  assertEquals(
+    actual,
+    {
+      oauth_consumer_key: "batch-8f4fd2c6-9fa3-4368-9797-52876d723dd1",
+      oauth_nonce: "xsEYfvjTEiPTR3TqJbmhCpUdrDoHF6nk",
+      oauth_signature: "b6nMehqpHnpx0VlZB9IhqFh4Jq0=",
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: 1504882975,
       oauth_version: "1.0",
     },
   );
