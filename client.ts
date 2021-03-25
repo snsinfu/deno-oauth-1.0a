@@ -10,7 +10,6 @@ const nonceLength = 32;
 export class OAuthClient {
   private consumer: Token;
   private signature: SignatureMethod;
-  private realm?: string;
 
   /**
    * Constructor sets common parameters for signing requests.
@@ -24,13 +23,10 @@ export class OAuthClient {
    *
    * @param opts.consumer - Consumer token (sometimes called app token).
    * @param opts.signature - Signature method to use.
-   * @param opts.realm - The realm parameter used to generate Authorization
-   *    header in the signToHeader method. Default is not to use realm.
    */
   constructor(opts: ClientOptions) {
     this.consumer = opts.consumer;
     this.signature = opts.signature;
-    this.realm = opts.realm;
   }
 
   /**
@@ -103,31 +99,12 @@ export class OAuthClient {
 
     return { oauth_signature: signature, ...params };
   }
-
-  /**
-   * Signs a request and returns an Authorization header. This method is
-   * equivalent to calling toAuthHeader() on the return value of the sign()
-   * method.
-   *
-   * ```ts
-   * const auth = client.signToHeader(
-   *   "GET",
-   *   "https://api.example.com/profile",
-   *   { token: { key: "spMmUxWb", secret: "SbovVfkxHTwcmupb" } },
-   * );
-   * console.log("Authorization:", auth);
-   * ```
-   */
-  signToHeader(method: string, url: string, opts?: SignOptions): string {
-    return toAuthHeader(this.sign(method, url, opts), this.realm);
-  }
 }
 
 /** Options for Client constructor. */
 export interface ClientOptions {
   consumer: Token;
   signature: SignatureMethod;
-  realm?: string;
 }
 
 /** Represents an OAuth token credential. */

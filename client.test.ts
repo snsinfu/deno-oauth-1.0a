@@ -126,7 +126,6 @@ Deno.test("OAuthClient.sign - produces correct HMAC-SHA1 signature (RFC)", () =>
   const client = new OAuthClient({
     consumer: { key: "9djdj82h48djs9d2", secret: "j49sk3j29djd" },
     signature: HMAC_SHA1,
-    realm: "Example",
   });
   const sign = client.sign(
     "POST",
@@ -371,30 +370,6 @@ Deno.test("OAuthClient.sign - computes correct signature for multi-valued query 
       oauth_version: "1.0",
     },
   );
-});
-
-Deno.test("OAuthClient.signToHeader - prepends realm", () => {
-  const client = new OAuthClient({
-    consumer: { key: "key", secret: "secret" },
-    realm: "Example",
-    signature: PLAINTEXT,
-  });
-
-  const actual = client.signToHeader("GET", "http://example.com", {
-    params: {
-      oauth_nonce: "123456",
-      oauth_timestamp: 1600000000,
-    },
-  });
-
-  const expected = 'OAuth realm="Example", ' +
-    'oauth_consumer_key="key", ' +
-    'oauth_nonce="123456", ' +
-    'oauth_signature="secret%26", ' +
-    'oauth_signature_method="PLAINTEXT", ' +
-    'oauth_timestamp="1600000000"';
-
-  assertEquals(actual, expected);
 });
 
 // POSTPROCESSING ------------------------------------------------------------

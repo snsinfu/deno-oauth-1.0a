@@ -14,8 +14,9 @@ OAuth 1.0a Request Authorization module for Deno. [Documentation][doc].
 
 ## Usage
 
-[OAuthClient][doc-OAuthClient] object generates HTTP Authorization header for a
-request:
+Use [OAuthClient][doc-OAuthClient] object to sign an HTTP request with consumer
+and token credentials. You get an `Authorization` header that can be added to
+an actual request.
 
 ```typescript
 import * as oauth from "https://raw.githubusercontent.com/snsinfu/deno-oauth-1.0a/main/mod.ts";
@@ -28,7 +29,7 @@ const client = new oauth.OAuthClient({
   signature: oauth.HMAC_SHA1,
 });
 
-const authHeader = client.signToHeader(
+const auth = oauth.toAuthHeader(client.sign(
   "PATCH",
   "https://api.example.com/profile",
   {
@@ -38,9 +39,9 @@ const authHeader = client.signToHeader(
     },
     body: new URLSearchParams({ status: "busy" }),
   },
-);
+));
 
-console.log("Authorization:", authHeader);
+console.log("Authorization:", auth);
 ```
 
 [doc-OAuthClient]: https://doc.deno.land/https/raw.githubusercontent.com/snsinfu/deno-oauth-1.0a/main/mod.ts#OAuthClient
