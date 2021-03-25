@@ -15,6 +15,13 @@ export class OAuthClient {
   /**
    * Constructor sets common parameters for signing requests.
    *
+   * ```ts
+   * const client = new OAuthClient({
+   *   consumer: { key: "GDTEA1vY", secret: "cE1DdqeY6K35LwDM" },
+   *   signature: HMAC_SHA1,
+   * });
+   * ```
+   *
    * @param opts.consumer - Consumer token (sometimes called app token).
    * @param opts.signature - Signature method to use.
    * @param opts.realm - The realm parameter used to generate Authorization
@@ -28,6 +35,13 @@ export class OAuthClient {
 
   /**
    * Signs a request.
+   *
+   * ```ts
+   * const params = client.sign("GET", "https://api.example.com/profile", {
+   *   token: { key: "spMmUxWb", secret: "SbovVfkxHTwcmupb" },
+   * });
+   * console.log(params.oauth_signature);
+   * ```
    *
    * @param method - HTTP method.
    * @param url - URL to request. This may contain query parameters.
@@ -94,6 +108,15 @@ export class OAuthClient {
    * Signs a request and returns an Authorization header. This method is
    * equivalent to calling toAuthHeader() on the return value of the sign()
    * method.
+   *
+   * ```ts
+   * const auth = client.signToHeader(
+   *   "GET",
+   *   "https://api.example.com/profile",
+   *   { token: { key: "spMmUxWb", secret: "SbovVfkxHTwcmupb" } },
+   * );
+   * console.log("Authorization:", auth);
+   * ```
    */
   signToHeader(method: string, url: string, opts?: SignOptions): string {
     return toAuthHeader(this.sign(method, url, opts), this.realm);
@@ -159,6 +182,14 @@ export interface SignedOAuthParams extends OAuthParams {
 /**
  * Composes HTTP Authorization header.
  *
+ * ```ts
+ * const params = client.sign("GET", "https://api.example.com/profile", {
+ *   token: { key: "spMmUxWb", secret: "SbovVfkxHTwcmupb" },
+ * });
+ * const auth = toAuthHeader(params);
+ * console.log("Authorization:", auth);
+ * ```
+ *
  * @param params - OAuth protocol parameters with signature.
  * @param realm - Optional realm parameter attached to the header.
  *
@@ -198,6 +229,14 @@ export function toAuthHeader(
 
 /**
  * Composes URL query parameters or a form-encoded body.
+ *
+ * ```ts
+ * const params = client.sign("GET", "https://api.example.com/profile", {
+ *   token: { key: "spMmUxWb", secret: "SbovVfkxHTwcmupb" },
+ * });
+ * const query = toQueryParams(params);
+ * console.log(query.toString());
+ * ```
  *
  * @param params - OAuth protocol parameters with signature.
  *
