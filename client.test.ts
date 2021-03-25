@@ -1,4 +1,4 @@
-import { createBaseParams, createBaseString, OAuthClient } from "./client.ts";
+import { createBaseParams, createBaseString, OAuthClient, toAuthHeader } from "./client.ts";
 import { PLAINTEXT, HMAC_SHA1 } from "./sign.ts";
 import { assert, assertEquals, assertNotEquals } from "./test_deps.ts";
 
@@ -161,6 +161,74 @@ Deno.test("OAuthClient.signToHeader - prepends realm", () => {
     'Q2H5CsP", oauth_signature="ri0lfv4udd2uQmkg5cCPVqLruyk%3D", oauth_s' +
     'ignature_method="HMAC-SHA1", oauth_timestamp="1445951836", oauth_ve' +
     'rsion="1.0"';
+
+  assertEquals(actual, expected);
+});
+
+// Taken from ddo/oauth-1.0a.
+Deno.test("OAuthClient.sign - produces correct parameters (Twitter)", () => {
+  const client = new OAuthClient({
+    consumer: {
+      key: "xvz1evFS4wEEPTGEFPHBog",
+      secret: "kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw",
+    },
+    signature: HMAC_SHA1,
+  });
+
+  const params = client.sign(
+    "POST",
+    "https://api.twitter.com/1/statuses/update.json?include_entities=true",
+    {
+      token: {
+        key: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
+        secret: "LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE",
+      },
+      params: {
+        oauth_timestamp: 1318622958,
+        oauth_nonce: "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg",
+        oauth_version: "1.0",
+      },
+      body: new URLSearchParams({
+        status: "Hello Ladies + Gentlemen, a signed OAuth request!",
+      }),
+    },
+  );
+
+  assertEquals(
+    params,
+    {
+      oauth_consumer_key: "xvz1evFS4wEEPTGEFPHBog",
+      oauth_nonce: "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg",
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: 1318622958,
+      oauth_version: "1.0",
+      oauth_token: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
+      oauth_signature: "tnnArxj06cWHq44gCs1OSKk/jLY=",
+    },
+  );
+});
+
+// Taken from ddo/oauth-1.0a.
+Deno.test("toAuthHeader - produces correct header (Twitter)", () => {
+  const actual = toAuthHeader(
+    {
+      oauth_consumer_key: "xvz1evFS4wEEPTGEFPHBog",
+      oauth_nonce: "kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg",
+      oauth_signature_method: "HMAC-SHA1",
+      oauth_timestamp: 1318622958,
+      oauth_version: "1.0",
+      oauth_token: "370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
+      oauth_signature: "tnnArxj06cWHq44gCs1OSKk/jLY=",
+    },
+  );
+  const expected =
+    'OAuth oauth_consumer_key="xvz1evFS4wEEPTGEFPHBog", ' +
+    'oauth_nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg", ' +
+    'oauth_signature="tnnArxj06cWHq44gCs1OSKk%2FjLY%3D", ' +
+    'oauth_signature_method="HMAC-SHA1", ' +
+    'oauth_timestamp="1318622958", ' +
+    'oauth_token="370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb", ' +
+    'oauth_version="1.0"';
 
   assertEquals(actual, expected);
 });
