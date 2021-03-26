@@ -7,7 +7,7 @@ export type { OAuthOptions, SignatureMethod, Token } from "../mod.ts";
 export class Api {
   private client: oauth.OAuthClient;
   private realm?: string;
-  private baseUrl: string;
+  private prefix: string;
 
   /**
    * Constructor sets common parameters for authorized HTTP requests.
@@ -16,7 +16,7 @@ export class Api {
    * const api = new Api({
    *   consumer: { key: "app-ynH3TBiW", secret: "JFvg8hoDL3xcOI3D" },
    *   signature: HMAC_SHA1,
-   *   baseUrl: "https://api.example.com",
+   *   prefix: "https://api.example.com",
    * });
    * ```
    *
@@ -24,12 +24,12 @@ export class Api {
    * @param opts.signature - Signature method to use (e.g., `HMAC_SHA1`).
    * @param opts.realm - Optional realm parameter attached to Authorization
    *    header of each request.
-   * @param opts.baseUrl - URL prefix for each request.
+   * @param opts.prefix - URL prefix for each request.
    */
   constructor(opts: ApiOptions) {
     this.client = new oauth.OAuthClient(opts);
     this.realm = opts.realm;
-    this.baseUrl = opts.baseUrl ?? "";
+    this.prefix = opts.prefix ?? "";
   }
 
   /**
@@ -43,7 +43,7 @@ export class Api {
    * ```
    *
    * @param method - HTTP request method (e.g., "GET").
-   * @param endpoint - URL to request, or relative path if `baseUrl` option has
+   * @param endpoint - URL to request, or relative path if `prefix` option has
    *    been set in the constructor.
    * @param opts.token - OAuth token credential used to sign the request.
    * @param opts.params - OAuth parameters to override.
@@ -62,7 +62,7 @@ export class Api {
     endpoint: string,
     opts?: RequestOptions,
   ): Promise<Response> {
-    const url = this.baseUrl + endpoint;
+    const url = this.prefix + endpoint;
 
     let body: URLSearchParams | string | undefined;
     let mime: string | undefined;
@@ -104,7 +104,7 @@ export interface ApiOptions {
   consumer: oauth.Token;
   signature: oauth.SignatureMethod;
   realm?: string;
-  baseUrl?: string;
+  prefix?: string;
 }
 
 /** Options for the Api.request() method. */

@@ -43,7 +43,7 @@ Deno.test("Api - makes a correct GET request (no query)", async () => {
   const api = new oauth.Api({
     consumer: { key: "app-key", secret: "app-secret" },
     signature: oauth.HMAC_SHA1,
-    baseUrl: "http://localhost:25127/v1",
+    prefix: "http://localhost:25127/v1",
   });
 
   const response = await api.request("GET", "/profile", {
