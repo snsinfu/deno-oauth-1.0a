@@ -64,6 +64,7 @@ export class Api {
   ): Promise<Response> {
     const url = this.prefix + endpoint;
 
+    let signBody = false;
     let body: URLSearchParams | string | undefined;
     let mime: string | undefined;
 
@@ -76,14 +77,22 @@ export class Api {
         ? opts.form
         : new URLSearchParams(opts.form);
       mime = "application/x-www-form-urlencoded";
+      signBody = true;
     }
 
     if (opts?.json) {
       body = JSON.stringify(opts.json);
       mime = "application/json";
+      signBody = opts.hashBody ?? false;
+    }
+
+    if (!body && opts?.hashBody) {
+      body = "";
+      signBody = true;
     }
 
     const headers = new Headers(opts?.headers);
+
     if (!headers.has("Content-Type") && mime) {
       headers.set("Content-Type", mime);
     }
@@ -91,7 +100,7 @@ export class Api {
     const params = this.client.sign(method, url, {
       token: opts?.token,
       params: opts?.params,
-      body: body,
+      body: signBody ? body : undefined,
     });
     headers.set("Authorization", oauth.toAuthHeader(params));
 
