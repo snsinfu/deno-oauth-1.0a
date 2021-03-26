@@ -46,6 +46,30 @@ console.log("Authorization:", auth);
 
 [doc-OAuthClient]: https://doc.deno.land/https/raw.githubusercontent.com/snsinfu/deno-oauth-1.0a/main/mod.ts#OAuthClient
 
+### High-level API
+
+An experimental, high-level module is available in the [extra](./extra)
+directory. [Documentation][doc-extra]. Basic usage:
+
+```typescript
+import * as oauth from "https://raw.githubusercontent.com/snsinfu/deno-oauth-1.0a/main/extra/mod.ts";
+
+const api = new oauth.Api({
+  prefix: "https://api.example.com/v1",
+  consumer: { key: "app-key", secret: "app-secret" },
+  signature: oauth.HMAC_SHA1,
+});
+
+const response = await api.request("POST", "/review", {
+  token: { key: "user-key", secret: "user-secret" },
+  json: { book: "c3c24bab", score: 5 },
+  hashBody: true,
+});
+const result = await response.json();
+```
+
+[doc-extra]: https://doc.deno.land/https/raw.githubusercontent.com/snsinfu/deno-oauth-1.0a/main/extra/mod.ts
+
 ## Test
 
 ```console
