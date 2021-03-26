@@ -2,6 +2,8 @@ import * as oauth from "./mod.ts";
 import * as http from "https://deno.land/std@0.90.0/http/mod.ts";
 import { assertEquals } from "https://deno.land/std@0.90.0/testing/asserts.ts";
 
+// MOCK SERVER ---------------------------------------------------------------
+
 interface RequestData {
   method: string;
   path: string;
@@ -33,12 +35,13 @@ function mock(hostname: string, port: number): MockData {
   return { server, requests };
 }
 
+// MAIN TESTS ----------------------------------------------------------------
+
 Deno.test("Api - makes a correct GET request (no query)", async () => {
   const { server, requests } = mock("localhost", 25127);
 
   const api = new oauth.Api({
     consumer: { key: "app-key", secret: "app-secret" },
-    token: { key: "user-key", secret: "user-secret" },
     signature: oauth.HMAC_SHA1,
     baseUrl: "http://localhost:25127/v1",
   });
@@ -48,6 +51,7 @@ Deno.test("Api - makes a correct GET request (no query)", async () => {
       oauth_nonce: "MusLRVYfe1Z8NaAXnXTdxKdurwRYhRIm",
       oauth_timestamp: 1616697632,
     },
+    token: { key: "user-key", secret: "user-secret" },
   });
   await response.blob();
 

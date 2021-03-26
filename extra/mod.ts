@@ -1,20 +1,62 @@
 import * as oauth from "../mod.ts";
 
 export { HMAC_SHA1, HMAC_SHA256, PLAINTEXT } from "../mod.ts";
+export type { OAuthOptions, SignatureMethod, Token } from "../mod.ts";
 
+/** Class for requesting OAuth-authorized HTTP endpoints. */
 export class Api {
   private client: oauth.OAuthClient;
-  private token?: oauth.Token;
   private realm?: string;
   private baseUrl: string;
 
+  /**
+   * Constructor sets common parameters for authorized HTTP requests.
+   *
+   * ```ts
+   * const api = new Api({
+   *   consumer: { key: "app-ynH3TBiW", secret: "JFvg8hoDL3xcOI3D" },
+   *   signature: HMAC_SHA1,
+   *   baseUrl: "https://api.example.com",
+   * });
+   * ```
+   *
+   * @param opts.consumer - OAuth consumer credential.
+   * @param opts.signature - Signature method to use (e.g., `HMAC_SHA1`).
+   * @param opts.realm - Optional realm parameter attached to Authorization
+   *    header of each request.
+   * @param opts.baseUrl - URL prefix for each request.
+   */
   constructor(opts: ApiOptions) {
     this.client = new oauth.OAuthClient(opts);
-    this.token = opts.token;
     this.realm = opts.realm;
     this.baseUrl = opts.baseUrl ?? "";
   }
 
+  /**
+   * Makes an HTTP request.
+   *
+   * ```ts
+   * const response = await api.request("GET", "/account/me", {
+   *   token: { key: "user-N6NfxiK3", secret: "MP2fqEBrmt1MyPkv" },
+   * });
+   * const data = await response.json();
+   * ```
+   *
+   * @param method - HTTP request method (e.g., "GET").
+   * @param endpoint - URL to request, or relative path if `baseUrl` option has
+   *    been set in the constructor.
+   * @param opts.token - OAuth token credential used to sign the request.
+   * @param opts.params - OAuth parameters to override.
+   * @param opts.headers - Extra HTTP headers to send.
+   * @param opts.form - Body data. It is sent as a form-encoded string. This
+   *    option is mutually exclusive to the `json` option.
+   * @param opts.json - Body data. It is sent as a JSON string. This option is
+   *    mutually exclusive to the `form` option.
+   * @param opts.hashBody - Set to true if you want to attach `oauth_body_hash`
+   *    parameter to Authorization header.
+   *
+   * @return Response.
+   */
   async request(
     method: string,
     endpoint: string,
@@ -47,7 +89,7 @@ export class Api {
     }
 
     const params = this.client.sign(method, url, {
-      token: this.token ?? opts?.token,
+      token: opts?.token,
       params: opts?.params,
       body: body,
     });
@@ -57,14 +99,15 @@ export class Api {
   }
 }
 
+/** Options for the Api constructor. */
 export interface ApiOptions {
   consumer: oauth.Token;
   signature: oauth.SignatureMethod;
-  token?: oauth.Token;
   realm?: string;
   baseUrl?: string;
 }
 
+/** Options for the Api.request() method. */
 export interface RequestOptions {
   token?: oauth.Token;
   params?: oauth.OAuthOptions;
