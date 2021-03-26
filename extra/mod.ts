@@ -48,6 +48,7 @@ export class Api {
    * @param opts.token - OAuth token credential used to sign the request.
    * @param opts.params - OAuth parameters to override.
    * @param opts.headers - Extra HTTP headers to send.
+   * @param opts.query - Query parameters to append to the URL.
    * @param opts.form - Body data. It is sent as a form-encoded string. This
    *    option is mutually exclusive to the `json` option.
    * @param opts.json - Body data. It is sent as a JSON string. This option is
@@ -62,8 +63,28 @@ export class Api {
     endpoint: string,
     opts?: RequestOptions,
   ): Promise<Response> {
-    const url = this.prefix + endpoint;
+    // Compose URL. Here, we want the prefix to just be prepended to the URL,
+    // so do not use the `base` option of the URL constructor.
+    const url = new URL(this.prefix + endpoint);
 
+    if (opts?.query) {
+      const extraQuery = opts.query instanceof URLSearchParams
+        ? opts.query
+        : new URLSearchParams(opts.query);
+      const extraQueryString = extraQuery.toString();
+
+      if (extraQueryString.length > 0) {
+        if (url.search.length > 0) {
+          url.search = url.search + "&" + extraQueryString;
+        } else {
+          url.search = extraQueryString;
+        }
+      }
+    }
+
+    // Encode body data. Note that JSON body should be sent unsigned if hashBody
+    // is explicitly set to true. In that case, we do not pass the body to the
+    // OAuthClient but still send it to the URL.
     let signBody = false;
     let body: URLSearchParams | string | undefined;
     let mime: string | undefined;
@@ -91,13 +112,14 @@ export class Api {
       signBody = true;
     }
 
+    // Compose headers.
     const headers = new Headers(opts?.headers);
 
     if (!headers.has("Content-Type") && mime) {
       headers.set("Content-Type", mime);
     }
 
-    const params = this.client.sign(method, url, {
+    const params = this.client.sign(method, url.toString(), {
       token: opts?.token,
       params: opts?.params,
       body: signBody ? body : undefined,
@@ -121,6 +143,7 @@ export interface RequestOptions {
   token?: oauth.Token;
   params?: oauth.OAuthOptions;
   headers?: Headers | Record<string, string>;
+  query?: URLSearchParams | Record<string, string>;
   form?: URLSearchParams | Record<string, string>;
   json?: object;
   hashBody?: boolean;

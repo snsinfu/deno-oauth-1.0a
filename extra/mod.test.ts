@@ -42,43 +42,83 @@ function mock(hostname: string, port: number): MockData {
 
 // MAIN TESTS ----------------------------------------------------------------
 
-Deno.test("Api - makes a correct GET request (no query)", async () => {
+Deno.test("Api - sends correct GET request", async () => {
   const { server, requests } = mock("localhost", 25127);
 
   const api = new oauth.Api({
     consumer: { key: "app-key", secret: "app-secret" },
     signature: oauth.HMAC_SHA1,
-    prefix: "http://localhost:25127/v1",
+    prefix: "http://localhost:25127",
   });
 
-  const response = await api.request("GET", "/profile", {
-    params: {
-      oauth_nonce: "MusLRVYfe1Z8NaAXnXTdxKdurwRYhRIm",
-      oauth_timestamp: 1616697632,
+  const examples = [
+    // Basic request.
+    {
+      endpoint: "/endpoint",
+      options: {
+        params: { oauth_nonce: "nonce", oauth_timestamp: 100 },
+      },
+      expect: {
+        path: "/endpoint",
+        auth: 'OAuth oauth_consumer_key="app-key", ' +
+          'oauth_nonce="nonce", ' +
+          'oauth_signature="ORIKP%2BXX%2B1edG%2BVYVxC6d%2FopZ0g%3D", ' +
+          'oauth_signature_method="HMAC-SHA1", ' +
+          'oauth_timestamp="100"',
+      },
     },
-    token: { key: "user-key", secret: "user-secret" },
-  });
-  await response.blob();
 
-  assertEquals(requests.length, 1);
+    // Extra query parameters.
+    {
+      endpoint: "/endpoint",
+      options: {
+        params: { oauth_nonce: "nonce", oauth_timestamp: 100 },
+        query: { page: "1", pagesize: "30" }
+      },
+      expect: {
+        path: "/endpoint?page=1&pagesize=30",
+        auth: 'OAuth oauth_consumer_key="app-key", ' +
+          'oauth_nonce="nonce", ' +
+          'oauth_signature="calTD8SPMeP%2Faxe6LEBfEtWPaSg%3D", ' +
+          'oauth_signature_method="HMAC-SHA1", ' +
+          'oauth_timestamp="100"',
+      },
+    },
 
-  const expectedAuth = 'OAuth oauth_consumer_key="app-key", ' +
-    'oauth_nonce="MusLRVYfe1Z8NaAXnXTdxKdurwRYhRIm", ' +
-    'oauth_signature="yv2X7DLlhZ7EiixdaSaGRGzktCw%3D", ' +
-    'oauth_signature_method="HMAC-SHA1", ' +
-    'oauth_timestamp="1616697632", ' +
-    'oauth_token="user-key"';
+    // Base query parameters + extra query parameters.
+    {
+      endpoint: "/endpoint?verifier=abc",
+      options: {
+        params: { oauth_nonce: "nonce", oauth_timestamp: 100 },
+        query: { page: "1", pagesize: "30" }
+      },
+      expect: {
+        path: "/endpoint?verifier=abc&page=1&pagesize=30",
+        auth: 'OAuth oauth_consumer_key="app-key", ' +
+          'oauth_nonce="nonce", ' +
+          'oauth_signature="gW%2FWc%2B%2Fv%2FX5IC6LnL2xPfurN564%3D", ' +
+          'oauth_signature_method="HMAC-SHA1", ' +
+          'oauth_timestamp="100"',
+      },
+    },
+  ];
 
-  const actual = requests[0];
-  assertEquals(actual.method, "GET");
-  assertEquals(actual.path, "/v1/profile");
-  assertEquals(actual.headers.get("Authorization"), expectedAuth);
+  for (const { endpoint, options, expect } of examples) {
+    const response = await api.request("GET", endpoint, options);
+    await response.blob();
+
+    const actual = requests.shift()!;
+
+    assertEquals(actual.method, "GET");
+    assertEquals(actual.path, expect.path);
+    assertEquals(actual.headers.get("Authorization"), expect.auth);
+  }
 
   server.close();
 });
 
 Deno.test("Api - sends correct request body", async () => {
-  const endpoint = `http://localhost:25128/endpoint`;
+  const endpoint = "http://localhost:25128/endpoint";
   const { server, requests } = mock("localhost", 25128);
 
   const api = new oauth.Api({
