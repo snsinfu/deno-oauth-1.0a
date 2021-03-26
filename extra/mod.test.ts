@@ -68,12 +68,30 @@ Deno.test("Api - sends correct GET request", async () => {
       },
     },
 
+    // Use of request token.
+    {
+      endpoint: "/endpoint",
+      options: {
+        params: { oauth_nonce: "nonce", oauth_timestamp: 100 },
+        token: { key: "user-key", secret: "user-secret" },
+      },
+      expect: {
+        path: "/endpoint",
+        auth: 'OAuth oauth_consumer_key="app-key", ' +
+          'oauth_nonce="nonce", ' +
+          'oauth_signature="mJGwdg7oZWleM5xOxI1uDCcTg64%3D", ' +
+          'oauth_signature_method="HMAC-SHA1", ' +
+          'oauth_timestamp="100", ' +
+          'oauth_token="user-key"',
+      },
+    },
+
     // Extra query parameters.
     {
       endpoint: "/endpoint",
       options: {
         params: { oauth_nonce: "nonce", oauth_timestamp: 100 },
-        query: { page: "1", pagesize: "30" }
+        query: { page: "1", pagesize: "30" },
       },
       expect: {
         path: "/endpoint?page=1&pagesize=30",
@@ -90,7 +108,7 @@ Deno.test("Api - sends correct GET request", async () => {
       endpoint: "/endpoint?verifier=abc",
       options: {
         params: { oauth_nonce: "nonce", oauth_timestamp: 100 },
-        query: { page: "1", pagesize: "30" }
+        query: { page: "1", pagesize: "30" },
       },
       expect: {
         path: "/endpoint?verifier=abc&page=1&pagesize=30",
