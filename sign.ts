@@ -1,6 +1,6 @@
-import * as base64 from "https://deno.land/std@0.90.0/encoding/base64.ts";
-import * as sha1 from "https://deno.land/std@0.90.0/hash/sha1.ts";
-import * as sha256 from "https://deno.land/std@0.90.0/hash/sha256.ts";
+import * as base64 from "https://deno.land/std@0.91.0/encoding/base64.ts";
+import * as sha1 from "https://deno.land/std@0.91.0/hash/sha1.ts";
+import * as sha256 from "https://deno.land/std@0.91.0/hash/sha256.ts";
 
 /** The PLAINTEXT signature method. */
 export const PLAINTEXT = {

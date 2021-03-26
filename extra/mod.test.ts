@@ -1,6 +1,6 @@
 import * as oauth from "./mod.ts";
-import * as http from "https://deno.land/std@0.90.0/http/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.90.0/testing/asserts.ts";
+import * as http from "https://deno.land/std@0.91.0/http/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.91.0/testing/asserts.ts";
 
 // MOCK SERVER ---------------------------------------------------------------
 
