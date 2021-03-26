@@ -1,6 +1,9 @@
 import * as oauth from "./mod.ts";
 import * as http from "https://deno.land/std@0.91.0/http/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.91.0/testing/asserts.ts";
+import {
+  assertEquals,
+  assertThrowsAsync,
+} from "https://deno.land/std@0.91.0/testing/asserts.ts";
 
 // MOCK SERVER ---------------------------------------------------------------
 
@@ -153,7 +156,7 @@ Deno.test("Api - sends correct request body", async () => {
         mime: null,
         body: "",
       },
-    }
+    },
   ];
 
   for (const { options, expect } of examples) {
@@ -170,4 +173,15 @@ Deno.test("Api - sends correct request body", async () => {
   }
 
   server.close();
+});
+
+Deno.test("Api - rejects request having both form and json", async () => {
+  const api = new oauth.Api({
+    consumer: { key: "app-key", secret: "app-secret" },
+    signature: oauth.HMAC_SHA1,
+  });
+
+  assertThrowsAsync(() =>
+    api.request("POST", "http://example.com", { form: {}, json: {} })
+  );
 });
