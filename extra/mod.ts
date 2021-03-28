@@ -7,7 +7,9 @@ export type { OAuthOptions, SignatureMethod, Token } from "../mod.ts";
 export class Api {
   private client: oauth.OAuthClient;
   private realm?: string;
-  private prefix: string;
+
+  /** URL prefix passed to the constructor (if any). */
+  readonly prefix: string;
 
   /**
    * Constructor sets common parameters for authorized HTTP requests.

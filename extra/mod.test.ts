@@ -1,6 +1,7 @@
 import * as oauth from "./mod.ts";
 import * as http from "https://deno.land/std@0.91.0/http/mod.ts";
 import {
+  assert,
   assertEquals,
   assertThrowsAsync,
 } from "https://deno.land/std@0.91.0/testing/asserts.ts";
@@ -41,6 +42,15 @@ function mock(hostname: string, port: number): MockData {
 }
 
 // MAIN TESTS ----------------------------------------------------------------
+
+Deno.test("Api.prefix - exposes prefix passed to constructor", () => {
+  const api = new oauth.Api({
+    consumer: { key: "app-key", secret: "app-secret" },
+    signature: oauth.HMAC_SHA1,
+    prefix: "http://example.com",
+  });
+  assertEquals(api.prefix, "http://example.com");
+});
 
 Deno.test("Api - sends correct GET request", async () => {
   const { server, requests } = mock("localhost", 25127);
