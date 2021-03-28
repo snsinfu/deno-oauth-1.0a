@@ -55,8 +55,6 @@ export class OAuthClient {
    * @return Signed OAuth protocol parameters as a SignedOAuthParams object.
    *    The result can be converted to an Authorization header (toAuthHeader),
    *    query parameters or form-encoded body (toQueryParams).
-   *
-   * @see signToHeader
    */
   sign(method: string, url: string, opts?: SignOptions): SignedOAuthParams {
     const params: OAuthParams = {
